@@ -1,19 +1,22 @@
 // Ultra Spoofer Login Page Script
 
-// Import the auth utilities (in a real app, you would use proper imports)
-// For this demo, we assume auth-utils.js is loaded before this script
-
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Login script loaded');
+  
+  // Check if AuthUtils is available
+  if (typeof AuthUtils === 'undefined') {
+    console.error('AuthUtils is not defined. Make sure auth-utils.js is loaded before login.js');
+    return;
+  }
+  
   // Initialize authentication system
   AuthUtils.init();
   
   // Check if user is already logged in
   if (AuthUtils.isLoggedIn()) {
-    // In a real app, you would redirect to a dashboard page
-    AuthUtils.showNotification('You are already logged in!');
-    
-    // For demo purposes, just show the current user info
-    console.log('Current user:', AuthUtils.getCurrentUser());
+    // Redirect to dashboard if already logged in
+    window.location.href = 'dashboard.html';
+    return;
   }
   
   // Get form elements
@@ -30,45 +33,51 @@ document.addEventListener('DOMContentLoaded', function() {
       // Get form values
       const emailOrLicenseKey = emailInput.value.trim();
       const password = passwordInput.value;
-      const rememberMe = rememberCheckbox.checked;
+      const rememberMe = rememberCheckbox ? rememberCheckbox.checked : false;
+      
+      if (!emailOrLicenseKey || !password) {
+        showNotification('Please enter both email/license and password.', true);
+        return;
+      }
       
       // Attempt login
       const result = AuthUtils.login(emailOrLicenseKey, password, rememberMe);
       
       if (result.success) {
-        AuthUtils.showNotification(result.message);
+        showNotification('Login successful! Redirecting to dashboard...');
         
-        // In a real app, you would redirect to a dashboard page
-        // For demo purposes, we'll simulate a redirect after a delay
+        // Redirect to dashboard
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'dashboard.html';
         }, 1500);
       } else {
-        AuthUtils.showNotification(result.message, true);
+        showNotification(result.message, true);
       }
     });
   }
   
   // Add visual feedback for form inputs
   function addInputListeners(inputElement) {
+    if (!inputElement) return;
+    
     inputElement.addEventListener('focus', function() {
-      this.parentElement.classList.add('focused');
+      this.style.borderColor = '#00f0ff';
+      this.style.boxShadow = '0 0 0 2px rgba(0, 240, 255, 0.2)';
     });
     
     inputElement.addEventListener('blur', function() {
-      this.parentElement.classList.remove('focused');
+      this.style.borderColor = '';
+      this.style.boxShadow = '';
       
       // Add validation styling
       if (this.value.trim() === '') {
-        this.parentElement.classList.add('error');
-      } else {
-        this.parentElement.classList.remove('error');
+        this.style.borderColor = '#ef4444';
       }
     });
     
     inputElement.addEventListener('input', function() {
       if (this.value.trim() !== '') {
-        this.parentElement.classList.remove('error');
+        this.style.borderColor = '';
       }
     });
   }
@@ -77,27 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (emailInput) addInputListeners(emailInput);
   if (passwordInput) addInputListeners(passwordInput);
 
-  // Add some helpful info about license keys
-  if (emailInput) {
-    const infoText = document.createElement('p');
-    infoText.className = 'form-info';
-    infoText.style.cssText = 'color: #d1d5db; font-size: 0.8rem; margin-top: 0.25rem;';
-    infoText.textContent = 'You can log in with your email or license key (e.g. ULTRA-SPOOF-1234-ABCD)';
-    emailInput.parentElement.appendChild(infoText);
-  }
-
-  // Add custom styles for focused inputs and validation
-  const style = document.createElement('style');
-  style.textContent = `
-    .form-group.focused input {
-      border-color: #00f0ff;
-      box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2);
-    }
-    
-    .form-group.error input {
-      border-color: #ef4444;
-      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
-    }
-  `;
-  document.head.appendChild(style);
+  // Function to show notifications
+  // Use AuthUtils.showNotification instead of creating our own
+function showNotification(message, isError = false) {
+    AuthUtils.showNotification(message, isError);
+}
 });
