@@ -26,17 +26,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeFirebase() {
   // Firebase configuration - replace with your actual config
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "your-project-id.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyA6W4Z0p1rMIcqfvsW38pswlQhJqitEKY8",
+  authDomain: "ultra-spoofer.firebaseapp.com",
+  projectId: "ultra-spoofer",
+  storageBucket: "ultra-spoofer.firebasestorage.app",
+  messagingSenderId: "478637927150",
+  appId: "1:478637927150:web:a2a79a89a995f0955a21ff",
+  measurementId: "G-S16K60NN14"
+};
   
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
+  
   
   // Authentication functions for client-side usage
   window.ultraAuth = {
