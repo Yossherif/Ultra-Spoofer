@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra Spoofer - Dashboard</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(to bottom right, #2d1a69, #4b0082);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Container styles */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    /* Navigation styles */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 1rem;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    a {
+      color: #b3b3b3;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    a:hover {
+      color: white;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #b3b3b3;
+      color: #e6e6e6;
+    }
+    
+    .btn-outline:hover {
+      background-color: #222;
+    }
+    
+    .btn-primary {
+      background-color: #3b82f6;
+      border: none;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+    
+    .btn-danger {
+      background-color: #ef4444;
+      border: none;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #dc2626;
+    }
+    
+    /* Dashboard styles */
+    .dashboard-container {
+      flex: 1;
+      padding: 2rem 1rem;
+    }
+    
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .dashboard-header h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .dashboard-header p {
+      font-size: 1.2rem;
+      color: #d1d5db;
+    }
+    
+    .dashboard-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .dashboard-card {
+      background-color: rgba(31, 41, 55, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 1px solid #4b5563;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+    
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      border-color: #00f0ff;
+    }
+    
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.5));
+    }
+    
+    .dashboard-card h2 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    
+    .dashboard-card p {
+      color: #d1d5db;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+    
+    .dashboard-card .btn {
+      width: 100%;
+      text-align: center;
+    }
+    
+    .account-info {
+      background-color: rgba(31, 41, 55, 0.3);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .account-info h2 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .account-info h2 svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .info-item .label {
+      font-size: 0.875rem;
+      color: #9ca3af;
+    }
+    
+    .info-item .value {
+      font-size: 1rem;
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+    
+    .license-list {
+      margin-top: 1.5rem;
+    }
+    
+    .license-item {
+      background-color: rgba(17, 24, 39, 0.5);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .license-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .license-key {
+      font-family: monospace;
+      color: #00f0ff;
+      font-weight: bold;
+    }
+    
+    .license-plan {
+      font-size: 0.875rem;
+      color: #9ca3af;
+    }
+    
+    .license-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    
+    .status-active {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+    
+    .status-expired {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+    
+    .cyberpunk-glow {
+      filter: drop-shadow(0 0 5px #00f0ff);
+    }
+    
+    /* Footer styles */
+    .footer {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 2rem 0;
+      margin-top: auto;
+    }
+    
+    .footer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .footer-top {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .footer-links a {
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .footer-links a:hover {
+      color: #d1d5db;
+    }
+    
+    .discord-logo {
+      transition: all 0.3s ease;
+    }
+    
+    .footer-links a:hover .discord-logo {
+      filter: drop-shadow(0 0 5px #5865F2);
+    }
+    
+    .copyright {
+      margin-top: 1.5rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+    
+    /* Responsive styles */
+    @media (min-width: 768px) {
+      .footer-top {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      
+      .footer-logo {
+        margin-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="container">
+    <div class="logo-container">
+      <svg width="40" height="40" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feFlood flood-color="#bf00ff" result="color" />
+            <feComposite in="color" in2="blur" operator="in" result="glowColor" />
+            <feComposite in="glowColor" in2="SourceGraphic" operator="over" />
+          </filter>
+        </defs>
+        <path 
+          d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+          fill="white" 
+          filter="url(#glow)" 
+        />
+        <ellipse cx="45" cy="50" rx="7" ry="10" fill="black" />
+        <ellipse cx="75" cy="50" rx="7" ry="10" fill="black" />
+        <ellipse cx="60" cy="70" rx="5" ry="7" fill="black" />
+      </svg>
+      <span style="font-weight: bold; font-size: 1.25rem;">Ultra Spoofer</span>
+    </div>
+    <div class="nav-links">
+      <span id="user-email" style="margin-right: 1rem; color: #d1d5db;">user@example.com</span>
+      <button id="logout-btn" class="btn btn-danger">Log Out</button>
+    </div>
+  </nav>
+  
+  <!-- Dashboard Content -->
+  <div class="dashboard-container container">
+    <div class="dashboard-header">
+      <h1>Welcome to Ultra Spoofer</h1>
+      <p>Access your license and start spoofing today</p>
+    </div>
+    
+    <div class="dashboard-content">
+      <div class="dashboard-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 7L12 3L4 7M20 7V17L12 21M20 7L12 11M12 21L4 17V7M12 21V11M4 7L12 11" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2>Download Spoofer</h2>
+        <p>Download the latest version of Ultra Spoofer to start changing your hardware ID.</p>
+        <button class="btn btn-primary">Download v2.5.1</button>
+      </div>
+      
+      <div class="dashboard-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 15V17M6 21H18C19.1046 21 20 20.1046 20 19V13C20 11.8954 19.1046 11 18 11H6C4.89543 11 4 11.8954 4 13V19C4 20.1046 4.89543 21 6 21ZM16 11V7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7V11H16Z" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2>Activation</h2>
+        <p>Activate your license key to unlock full access to all Ultra Spoofer features.</p>
+        <button class="btn btn-outline">Manage License</button>
+      </div>
+      
+      <div class="dashboard-card">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 20H22V18C22 16.3431 20.6569 15 19 15C18.0444 15 17.1931 15.4468 16.6438 16.1429M17 20H7M17 20V18C17 17.3438 16.8736 16.717 16.6438 16.1429M7 20H2V18C2 16.3431 3.34315 15 5 15C5.95561 15 6.80686 15.4468 7.35625 16.1429M7 20V18C7 17.3438 7.12642 16.717 7.35625 16.1429M7.35625 16.1429C8.0935 14.301 9.89482 13 12 13C14.1052 13 15.9065 14.301 16.6438 16.1429M15 7C15 8.65685 13.6569 10 12 10C10.3431 10 9 8.65685 9 7C9 5.34315 10.3431 4 12 4C13.6569 4 15 5.34315 15 7ZM21 10C21 11.1046 20.1046 12 19 12C17.8954 12 17 11.1046 17 10C17 8.89543 17.8954 8 19 8C20.1046 8 21 8.89543 21 10ZM7 10C7 11.1046 6.10457 12 5 12C3.89543 12 3 11.1046 3 10C3 8.89543 3.89543 8 5 8C6.10457 8 7 8.89543 7 10Z" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2>Support</h2>
+        <p>Need help? Join our Discord community for fast and friendly support from our team.</p>
+        <a href="https://discord.gg/GTtBSeSTmG" target="_blank" class="btn btn-outline">
+          <span style="display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+            <svg class="discord-logo" width="16" height="16" viewBox="0 0 24 24" fill="#5865F2">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/>
+            </svg>
+            Join Discord
+          </span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Account Info Section -->
+    <div class="account-info">
+      <h2>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Account Information
+      </h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Email</span>
+          <span class="value" id="account-email">user@example.com</span>
+        </div>
+        
+        <div class="info-item">
+          <span class="label">Account Created</span>
+          <span class="value" id="account-created">March 30, 2025</span>
+        </div>
+      </div>
+      
+      <h3 style="margin-top: 2rem; margin-bottom: 1rem; font-size: 1.25rem;">Your Licenses</h3>
+      
+      <div class="license-list" id="license-list">
+        <!-- License items will be added dynamically via JavaScript -->
+        <div class="license-item">
+          <div class="license-details">
+            <span class="license-key">ULTRA-SPOOF-****-****</span>
+            <span class="license-plan">You don't have any active licenses</span>
+          </div>
+          <button class="btn btn-outline" style="font-size: 0.875rem; padding: 0.375rem 0.75rem;">Buy License</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 120 120">
+            <path 
+              d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+              fill="white" 
+              stroke="#a855f7"
+              stroke-width="2"
+            />
+            <ellipse cx="45" cy="50" rx="4" ry="6" fill="black" />
+            <ellipse cx="75" cy="50" rx="4" ry="6" fill="black" />
+            <ellipse cx="60" cy="70" rx="3" ry="4" fill="black" />
+          </svg>
+          <span style="font-weight: bold;">Ultra Spoofer</span>
+        </div>
+        <div class="footer-links">
+          <a href="https://discord.gg/GTtBSeSTmG" target="_blank">
+            <svg class="discord-logo" width="24" height="24" viewBox="0 0 24 24" fill="#5865F2">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/>
+            </svg>
+            Join our Discord
+          </a>
+        </div>
+      </div>
+      <div class="copyright">
+        © 2025 Ultra Spoofer. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Load scripts -->
+  <script src="auth-utils.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
