@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra Spoofer</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(to bottom right, #2d1a69, #4b0082);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    /* Container styles */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    /* Navigation styles */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 1rem;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    a {
+      color: #b3b3b3;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    a:hover {
+      color: white;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid #b3b3b3;
+      color: #e6e6e6;
+    }
+    
+    .btn-outline:hover {
+      background-color: #222;
+    }
+    
+    .btn-primary {
+      background-color: #3b82f6;
+      border: none;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+    
+    /* Hero section styles */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+    
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .hero p {
+      font-size: 1.5rem;
+      color: #d1d5db;
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+    
+    .feature-list {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    /* Pricing section styles */
+    .pricing-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto 6rem;
+      padding: 0 1rem;
+    }
+    
+    .pricing-card {
+      background-color: rgba(31, 41, 55, 0.5);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 1px solid #4b5563;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+    }
+    
+    .pricing-card:hover {
+      transform: translateY(-5px);
+      border-color: #3b82f6;
+    }
+    
+    .pricing-card.featured {
+      background: linear-gradient(to bottom, #0f172a, #1e293b);
+      border-color: #00f0ff;
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px rgba(0, 240, 255, 0.3);
+    }
+    
+    .pricing-card.featured:hover {
+      transform: scale(1.07);
+      box-shadow: 0 15px 35px rgba(0, 240, 255, 0.5);
+      border-color: #00f0ff;
+      background: linear-gradient(to bottom, #0f172a, #1a2538);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .plan-name {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .badge {
+      background-color: #00f0ff;
+      color: #0f172a;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+    }
+    
+    .price {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .price-suffix {
+      font-size: 1rem;
+      color: #9ca3af;
+      margin-left: 0.5rem;
+    }
+    
+    .price-info {
+      font-size: 0.875rem;
+      color: #9ca3af;
+      margin-bottom: 1.5rem;
+    }
+    
+    .plan-description {
+      color: #d1d5db;
+      margin-bottom: 1.5rem;
+    }
+    
+    .feature-list-card {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+    
+    .feature-list-card li {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    
+    .feature-list-card li svg {
+      flex-shrink: 0;
+      margin-right: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    
+    .btn-card {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .btn-card-outline {
+      background-color: transparent;
+      border: 1px solid #3b82f6;
+      color: #60a5fa;
+    }
+    
+    .btn-card-outline:hover {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    .btn-card-primary {
+      background-color: #00f0ff;
+      color: #0f172a;
+      border: none;
+      font-weight: bold;
+    }
+    
+    .btn-card-primary:hover {
+      background-color: #00d1e0;
+    }
+    
+    .btn-card-purple {
+      background-color: #312e81;
+      border: 1px solid #facc15;
+      color: #facc15;
+      font-weight: bold;
+    }
+    
+    .btn-card-purple:hover {
+      background-color: #facc15;
+      color: #312e81;
+    }
+    
+    /* FAQ section styles */
+    .faq-section {
+      padding: 4rem 1rem 6rem;
+    }
+    
+    .faq-section h2 {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .faq-item {
+      background-color: rgba(31, 41, 55, 0.3);
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+    }
+    
+    .faq-item h3 {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+    }
+    
+    .faq-item p {
+      color: #d1d5db;
+    }
+    
+    /* Footer styles */
+    .footer {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 2rem 0;
+    }
+    
+    .footer-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .footer-top {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .footer-links a {
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .footer-links a:hover {
+      color: #d1d5db;
+    }
+    
+    .discord-logo {
+      transition: all 0.3s ease;
+    }
+    
+    .footer-links a:hover .discord-logo {
+      filter: drop-shadow(0 0 5px #5865F2);
+    }
+    
+    .copyright {
+      margin-top: 1.5rem;
+      color: #6b7280;
+      font-size: 0.875rem;
+      text-align: center;
+    }
+    
+    /* Responsive styles */
+    @media (min-width: 768px) {
+      .footer-top {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      
+      .footer-logo {
+        margin-bottom: 0;
+      }
+    }
+    
+    /* SVG icons */
+    .check-icon {
+      fill: none;
+      stroke: #4ade80;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    
+    .arrow-right {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    
+    /* Cyberpunk glow effect */
+    .cyberpunk-glow {
+      filter: drop-shadow(0 0 5px #00f0ff);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="container">
+    <div class="logo-container">
+      <svg width="40" height="40" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="6" result="blur" />
+            <feFlood flood-color="#bf00ff" result="color" />
+            <feComposite in="color" in2="blur" operator="in" result="glowColor" />
+            <feComposite in="glowColor" in2="SourceGraphic" operator="over" />
+          </filter>
+        </defs>
+        <path 
+          d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+          fill="white" 
+          filter="url(#glow)" 
+        />
+        <ellipse cx="45" cy="50" rx="7" ry="10" fill="black" />
+        <ellipse cx="75" cy="50" rx="7" ry="10" fill="black" />
+        <ellipse cx="60" cy="70" rx="5" ry="7" fill="black" />
+      </svg>
+      <span style="font-weight: bold; font-size: 1.25rem;">Ultra Spoofer</span>
+    </div>
+    <div class="nav-links">
+      <a href="https://discord.gg/vNDycAuV" target="_blank">Support</a>
+      <a href="./log_in.html">
+  <button class="btn btn-outline">Log In</button>
+</a>
+<a href="./sign_up.html">
+      <button class="btn btn-primary">Sign Up</button>
+    </div>
+    </a>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero container">
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
+      <svg width="80" height="80" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <use href="#glow"></use>
+        <path 
+          d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+          fill="white" 
+          filter="url(#glow)" 
+        />
+        <ellipse cx="45" cy="50" rx="7" ry="10" fill="black" />
+        <ellipse cx="75" cy="50" rx="7" ry="10" fill="black" />
+        <ellipse cx="60" cy="70" rx="5" ry="7" fill="black" />
+      </svg>
+    </div>
+    <h1>Ultra Spoofer</h1>
+    <p>Bypass game hardware bans with ease.</p>
+  </section>
+
+  <!-- Pricing Cards -->
+  <div class="pricing-container">
+    <!-- Monthly Plan -->
+    <div class="pricing-card">
+      <div class="card-header">
+        <div class="plan-name">
+          <svg width="24" height="24" viewBox="0 0 120 120" style="margin-right: 0.75rem;">
+            <path 
+              d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+              fill="white" 
+              stroke="#a855f7"
+              stroke-width="3"
+            />
+            <ellipse cx="45" cy="50" rx="5" ry="7" fill="black" />
+            <ellipse cx="75" cy="50" rx="5" ry="7" fill="black" />
+            <ellipse cx="60" cy="70" rx="3" ry="5" fill="black" />
+          </svg>
+          <h3 style="font-size: 1.25rem; font-weight: bold;">Monthly</h3>
+        </div>
+      </div>
+      <div class="price">$14<span class="price-suffix">/month</span></div>
+      <p class="plan-description">Perfect for trying out Ultra Spoofer with all premium features. <br></p>
+      <ul class="feature-list-card">
+
+      </ul>
+      <button class="btn-card btn-card-outline">
+        Buy Now
+        <svg width="16" height="16" viewBox="0 0 24 24" class="arrow-right" style="margin-left: 0.5rem;">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Annual Plan (Featured) - Cyberpunk Style -->
+    <div class="pricing-card featured">
+      <div class="card-header">
+        <div class="plan-name">
+          <svg width="24" height="24" viewBox="0 0 120 120" style="margin-right: 0.75rem;" class="cyberpunk-glow">
+            <path 
+              d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+              fill="#0f172a" 
+              stroke="#00f0ff"
+              stroke-width="3"
+            />
+            <ellipse cx="45" cy="50" rx="5" ry="7" fill="#00f0ff" />
+            <ellipse cx="75" cy="50" rx="5" ry="7" fill="#00f0ff" />
+            <ellipse cx="60" cy="70" rx="3" ry="5" fill="#00f0ff" />
+          </svg>
+          <h3 style="font-size: 1.25rem; font-weight: bold;">Annual</h3>
+        </div>
+        <span class="badge">BEST VALUE</span>
+      </div>
+      <div class="price" style="color: #00f0ff;">$29<span class="price-suffix">/year</span></div>
+      <p class="price-info">Save 83% compared to monthly</p>
+      <p class="plan-description">Year round access to Ultra Spoofer.</p>
+      <ul class="feature-list-card">
+
+      </ul>
+      <button class="btn-card btn-card-primary">
+        Buy Now
+        <svg width="16" height="16" viewBox="0 0 24 24" class="arrow-right" style="margin-left: 0.5rem; stroke: #0f172a;">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Lifetime Plan - Premium Gold Style -->
+    <div class="pricing-card">
+      <div class="card-header">
+        <div class="plan-name">
+          <svg width="24" height="24" viewBox="0 0 120 120" style="margin-right: 0.75rem;">
+            <path 
+              d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+              fill="#312e81" 
+              stroke="#facc15"
+              stroke-width="3"
+            />
+            <ellipse cx="45" cy="50" rx="5" ry="7" fill="#facc15" />
+            <ellipse cx="75" cy="50" rx="5" ry="7" fill="#facc15" />
+            <ellipse cx="60" cy="70" rx="3" ry="5" fill="#facc15" />
+          </svg>
+          <h3 style="font-size: 1.25rem; font-weight: bold;">Lifetime</h3>
+        </div>
+      </div>
+      <div class="price" style="color: #facc15;">$69<span class="price-suffix">/once</span></div>
+      <p class="plan-description">One-time payment for unlimited access to Ultra Spoofer forever for 2 devices.</p>
+      <ul class="feature-list-card">
+
+        <li>
+    
+      </ul>
+      <button class="btn-card btn-card-purple">
+        Buy Now
+        <svg width="16" height="16" viewBox="0 0 24 24" class="arrow-right" style="margin-left: 0.5rem; stroke: #facc15;">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="faq-section container">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <h3>What is Ultra Spoofer?</h3>
+        <p>Ultra Spoofer is a premium tool that allows you to Spoof/Hide/Change your HWID which is a unique identifier for your computer, changing it allows you to bypass Hardware Bans in games.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Can I get a Refund?</h3>
+        <p>No Refunds are offered, But if you face problems with your key activation you can be provided with another key so dont hesitate to contact us.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What platforms are supported?</h3>
+        <p>Only Windows is supported.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <svg width="20" height="20" viewBox="0 0 120 120">
+            <path 
+              d="M60,20 C40,20 25,35 25,60 C25,75 25,95 20,100 C35,100 40,90 45,100 C50,90 55,100 60,100 C65,100 70,90 75,100 C80,90 85,100 100,100 C95,95 95,75 95,60 C95,35 80,20 60,20 Z" 
+              fill="white" 
+              stroke="#a855f7"
+              stroke-width="2"
+            />
+            <ellipse cx="45" cy="50" rx="4" ry="6" fill="black" />
+            <ellipse cx="75" cy="50" rx="4" ry="6" fill="black" />
+            <ellipse cx="60" cy="70" rx="3" ry="4" fill="black" />
+          </svg>
+          <span style="font-weight: bold;">Ultra Spoofer</span>
+        </div>
+        <div class="footer-links">
+          <a href="https://discord.gg/vNDycAuV" target="_blank">
+            <svg class="discord-logo" width="24" height="24" viewBox="0 0 24 24" fill="#5865F2">
+              <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/>
+            </svg>
+            Join our Discord
+          </a>
+        </div>
+      </div>
+      <div class="copyright">
+        © 2025 Ultra Spoofer. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
