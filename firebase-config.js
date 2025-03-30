@@ -1,26 +1,26 @@
 // firebase-config.js - Firebase configuration file
 
-// Import Firebase SDK
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
-// Replace these values with your actual Firebase project configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA6W4Z0p1rMIcqfvsW38pswlQhJqitEKY8",
+  authDomain: "ultra-spoofer.firebaseapp.com",
+  projectId: "ultra-spoofer",
+  storageBucket: "ultra-spoofer.firebasestorage.app",
+  messagingSenderId: "478637927150",
+  appId: "1:478637927150:web:a2a79a89a995f0955a21ff",
+  measurementId: "G-S16K60NN14"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Authentication and Firestore
-const auth = getAuth(app);
-const db = getFirestore(app);
+const analytics = getAnalytics(app);
 
 export { auth, db };
