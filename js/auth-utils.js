@@ -30,16 +30,32 @@ const AuthUtils = {
   },
 
   // Register a new user
-  async register(email, password) {
-    try {
-      // Basic validation
-      if (!this.validateEmail(email)) {
-        return { success: false, message: 'Please enter a valid email address.' };
-      }
+async register(email, password) {
+  try {
+    console.log("Starting registration for:", email);
+    
+    // Basic validation
+    if (!this.validateEmail(email)) {
+      console.log("Email validation failed");
+      return { success: false, message: 'Please enter a valid email address.' };
+    }
       
       if (!this.validatePassword(password)) {
         return { success: false, message: 'Password must be at least 8 characters long and include at least one number or symbol.' };
       }
+	  
+	  console.log("Creating user in Firebase Auth...");
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    console.log("User created in Auth:", userCredential.user.uid);
+    
+    console.log("Creating user document in Firestore...");
+    await setDoc(doc(db, 'users', user.uid), {
+      email,
+      createdAt: new Date().toISOString(),
+      licenseKeys: [],
+      isActive: true
+    });
+    console.log("User document created in Firestore");
       
       // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -62,9 +78,15 @@ const AuthUtils = {
           licenseKeys: []
         }
       };
-    } catch (error) {
-      console.error('Registration error:', error);
-      
+     } catch (error) {
+    console.error('Registration error details:', error);
+    // Log specific error information
+    console.log("Error code:", error.code);
+    console.log("Error message:", error.message);
+    
+    return { success: false, message: error.message || 'Registration failed' };
+  }
+}
       // Handle Firebase specific errors
       if (error.code === 'auth/email-already-in-use') {
         return { success: false, message: 'An account with this email already exists.' };
