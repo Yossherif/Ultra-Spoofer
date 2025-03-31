@@ -1,269 +1,367 @@
-// Ultra Spoofer Authentication Utilities
+// Ultra Spoofer Authentication Utilities with Firebase
+import { auth, db } from './firebase-config';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut,
+  onAuthStateChanged
+} from 'firebase/auth';
+import { 
+  doc, 
+  setDoc, 
+  getDoc, 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  updateDoc, 
+  arrayUnion,
+  serverTimestamp 
+} from 'firebase/firestore';
 
-// User database simulation using localStorage
 const AuthUtils = {
   // Initialize the auth system
   init() {
-    if (!localStorage.getItem('ultraSpooferUsers')) {
-      localStorage.setItem('ultraSpooferUsers', JSON.stringify([]));
-    }
-    
-    if (!localStorage.getItem('ultraSpooferLicenseKeys')) {
-      // Add some sample license keys (in a real app, these would come from a secure backend)
-      const sampleKeys = [
-        { key: 'ULTRA-SPOOF-1234-ABCD', used: false, plan: 'monthly', expiresAt: this.getExpiryDate(30) },
-        { key: 'ULTRA-SPOOF-5678-EFGH', used: false, plan: 'annual', expiresAt: this.getExpiryDate(365) },
-        { key: 'ULTRA-SPOOF-9012-IJKL', used: false, plan: 'lifetime', expiresAt: null }
-      ];
-      localStorage.setItem('ultraSpooferLicenseKeys', JSON.stringify(sampleKeys));
-    }
-
-    // Check if user is already logged in
-    const currentUser = localStorage.getItem('ultraSpooferCurrentUser');
-    if (currentUser) {
-      const userData = JSON.parse(currentUser);
-      // Check if "remember me" was checked, otherwise clear on page refresh
-      if (!userData.rememberMe) {
-        this.logout();
-      } else {
-        // Check if token is expired
-        if (userData.expiresAt && new Date(userData.expiresAt) < new Date()) {
-          this.logout();
-        }
-      }
-    }
+    // Set up authentication state listener
+    onAuthStateChanged(auth, (user) => {
+      // You can handle auth state changes here if needed
+      console.log("Auth state changed:", user ? "logged in" : "logged out");
+    });
   },
 
   // Register a new user
-  register(email, password) {
-    // Basic validation
-    if (!this.validateEmail(email)) {
-      return { success: false, message: 'Please enter a valid email address.' };
-    }
-    
-    if (!this.validatePassword(password)) {
-      return { success: false, message: 'Password must be at least 8 characters long and include at least one number or symbol.' };
-    }
-    
-    // Check if user already exists
-    const users = JSON.parse(localStorage.getItem('ultraSpooferUsers'));
-    const existingUser = users.find(user => user.email.toLowerCase() === email.toLowerCase());
-    
-    if (existingUser) {
-      return { success: false, message: 'An account with this email already exists.' };
-    }
-    
-    // Create new user
-    const newUser = {
-      id: this.generateUserId(),
-      email,
-      // In a real app, you would hash the password
-      password,
-      createdAt: new Date().toISOString(),
-      licenseKeys: [],
-      isActive: true
-    };
-    
-    users.push(newUser);
-    localStorage.setItem('ultraSpooferUsers', JSON.stringify(users));
-    
-    return { success: true, message: 'Account created successfully!', user: { ...newUser, password: undefined } };
-  },
-
-  // Login with email and password
-  login(emailOrLicenseKey, password, rememberMe = false) {
-    if (!emailOrLicenseKey || !password) {
-      return { success: false, message: 'Please enter both email/license and password.' };
-    }
-    
-    const users = JSON.parse(localStorage.getItem('ultraSpooferUsers'));
-
-    // First check if it's a license key login
-    if (this.isLicenseKeyFormat(emailOrLicenseKey)) {
-      return this.loginWithLicenseKey(emailOrLicenseKey, password, rememberMe);
-    }
-    
-    // Otherwise, try email login
-    const user = users.find(user => user.email.toLowerCase() === emailOrLicenseKey.toLowerCase());
-    
-    if (!user) {
-      return { success: false, message: 'No account found with this email.' };
-    }
-    
-    if (user.password !== password) {
-      return { success: false, message: 'Incorrect password.' };
-    }
-    
-    if (!user.isActive) {
-      return { success: false, message: 'Your account has been deactivated.' };
-    }
-    
-    // Set current user in storage
-    const currentUser = {
-      id: user.id,
-      email: user.email,
-      licenseKeys: user.licenseKeys,
-      rememberMe,
-      expiresAt: rememberMe ? null : this.getSessionExpiryTime()
-    };
-    
-    localStorage.setItem('ultraSpooferCurrentUser', JSON.stringify(currentUser));
-    
-    return { success: true, message: 'Login successful!', user: currentUser };
-  },
-
-  // Login with license key
-  loginWithLicenseKey(licenseKey, password, rememberMe = false) {
-    // Validate license key format
-    if (!this.isLicenseKeyFormat(licenseKey)) {
-      return { success: false, message: 'Invalid license key format.' };
-    }
-    
-    // Check if license key exists
-    const licenseKeys = JSON.parse(localStorage.getItem('ultraSpooferLicenseKeys'));
-    const licenseKeyData = licenseKeys.find(lk => lk.key === licenseKey);
-    
-    if (!licenseKeyData) {
-      return { success: false, message: 'Invalid license key.' };
-    }
-    
-    // Check if license key is already used and associated with an account
-    const users = JSON.parse(localStorage.getItem('ultraSpooferUsers'));
-    const userWithLicense = users.find(user => 
-      user.licenseKeys.some(userKey => userKey.key === licenseKey)
-    );
-    
-    if (userWithLicense) {
-      // If the license is already used, check if the password matches
-      if (userWithLicense.password !== password) {
-        return { success: false, message: 'Incorrect password for this license key.' };
+  async register(email, password) {
+    try {
+      // Basic validation
+      if (!this.validateEmail(email)) {
+        return { success: false, message: 'Please enter a valid email address.' };
       }
       
-      // Set current user in storage
-      const currentUser = {
-        id: userWithLicense.id,
-        email: userWithLicense.email,
-        licenseKeys: userWithLicense.licenseKeys,
-        rememberMe,
-        expiresAt: rememberMe ? null : this.getSessionExpiryTime()
-      };
+      if (!this.validatePassword(password)) {
+        return { success: false, message: 'Password must be at least 8 characters long and include at least one number or symbol.' };
+      }
       
-      localStorage.setItem('ultraSpooferCurrentUser', JSON.stringify(currentUser));
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
       
-      return { success: true, message: 'Login successful!', user: currentUser };
-    } else {
-      // If the license is not associated with any account yet
-      // In a real app, you would prompt the user to create an account
-      // For this implementation, we'll create a temporary account
-      const newUserId = this.generateUserId();
-      const newUser = {
-        id: newUserId,
-        email: `user_${newUserId}@example.com`, // Temporary email
-        password, // Use the provided password
+      // Create user document in Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        email,
         createdAt: new Date().toISOString(),
-        licenseKeys: [{ 
-          key: licenseKey, 
-          plan: licenseKeyData.plan, 
-          activatedAt: new Date().toISOString(),
-          expiresAt: licenseKeyData.expiresAt 
-        }],
+        licenseKeys: [],
         isActive: true
-      };
-      
-      // Mark the license key as used
-      licenseKeyData.used = true;
-      localStorage.setItem('ultraSpooferLicenseKeys', JSON.stringify(licenseKeys));
-      
-      // Add the new user
-      users.push(newUser);
-      localStorage.setItem('ultraSpooferUsers', JSON.stringify(users));
-      
-      // Set current user in storage
-      const currentUser = {
-        id: newUser.id,
-        email: newUser.email,
-        licenseKeys: newUser.licenseKeys,
-        rememberMe,
-        expiresAt: rememberMe ? null : this.getSessionExpiryTime()
-      };
-      
-      localStorage.setItem('ultraSpooferCurrentUser', JSON.stringify(currentUser));
+      });
       
       return { 
         success: true, 
-        message: 'License key activated successfully! A temporary account has been created.', 
-        user: currentUser 
+        message: 'Account created successfully!',
+        user: {
+          id: user.uid,
+          email: user.email,
+          licenseKeys: []
+        }
       };
+    } catch (error) {
+      console.error('Registration error:', error);
+      
+      // Handle Firebase specific errors
+      if (error.code === 'auth/email-already-in-use') {
+        return { success: false, message: 'An account with this email already exists.' };
+      }
+      
+      return { success: false, message: error.message || 'Registration failed' };
+    }
+  },
+
+  // Login with email and password
+  async login(emailOrLicenseKey, password, rememberMe = false) {
+    try {
+      if (!emailOrLicenseKey || !password) {
+        return { success: false, message: 'Please enter both email/license and password.' };
+      }
+      
+      // Check if input is a license key
+      if (this.isLicenseKeyFormat(emailOrLicenseKey)) {
+        return await this.loginWithLicenseKey(emailOrLicenseKey, password);
+      }
+      
+      // Regular email login
+      const userCredential = await signInWithEmailAndPassword(auth, emailOrLicenseKey, password);
+      const user = userCredential.user;
+      
+      // Get user data from Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (!userDoc.exists()) {
+        // User exists in Auth but not in Firestore, create the document
+        await setDoc(doc(db, 'users', user.uid), {
+          email: user.email,
+          createdAt: new Date().toISOString(),
+          licenseKeys: [],
+          isActive: true
+        });
+        
+        return {
+          success: true,
+          message: 'Login successful!',
+          user: {
+            id: user.uid,
+            email: user.email,
+            licenseKeys: []
+          }
+        };
+      }
+      
+      const userData = userDoc.data();
+      
+      if (!userData.isActive) {
+        await signOut(auth);
+        return { success: false, message: 'Your account has been deactivated.' };
+      }
+      
+      return {
+        success: true,
+        message: 'Login successful!',
+        user: {
+          id: user.uid,
+          email: user.email,
+          licenseKeys: userData.licenseKeys || []
+        }
+      };
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Handle Firebase specific errors
+      if (error.code === 'auth/user-not-found') {
+        return { success: false, message: 'No account found with this email.' };
+      }
+      
+      if (error.code === 'auth/wrong-password') {
+        return { success: false, message: 'Incorrect password.' };
+      }
+      
+      return { success: false, message: error.message || 'Login failed' };
+    }
+  },
+
+  // Login with license key
+  async loginWithLicenseKey(licenseKey, password) {
+    try {
+      // Validate license key format
+      if (!this.isLicenseKeyFormat(licenseKey)) {
+        return { success: false, message: 'Invalid license key format.' };
+      }
+      
+      // Look up license key in Firestore
+      const licenseQuery = query(
+        collection(db, 'licenses'),
+        where('key', '==', licenseKey)
+      );
+      
+      const licenseSnapshot = await getDocs(licenseQuery);
+      
+      if (licenseSnapshot.empty) {
+        return { success: false, message: 'Invalid license key.' };
+      }
+      
+      const licenseDoc = licenseSnapshot.docs[0];
+      const licenseData = licenseDoc.data();
+      
+      // Check if license is already associated with a user
+      if (licenseData.userId) {
+        // Get user by ID
+        const userDoc = await getDoc(doc(db, 'users', licenseData.userId));
+        
+        if (!userDoc.exists()) {
+          return { success: false, message: 'User associated with license not found.' };
+        }
+        
+        const userData = userDoc.data();
+        
+        // We need to sign in with email and password
+        if (!userData.email) {
+          return { success: false, message: 'User data is incomplete.' };
+        }
+        
+        // Now sign in with the user's email and the provided password
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, userData.email, password);
+          
+          return {
+            success: true,
+            message: 'Login successful!',
+            user: {
+              id: userCredential.user.uid,
+              email: userCredential.user.email,
+              licenseKeys: userData.licenseKeys || []
+            }
+          };
+        } catch (signInError) {
+          if (signInError.code === 'auth/wrong-password') {
+            return { success: false, message: 'Incorrect password for this license key.' };
+          }
+          throw signInError;
+        }
+      } else {
+        // License not associated with any user, create a temporary account
+        const email = `user_${this.generateRandomString(10)}@ultraspoofer.com`;
+        
+        // Create new user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Add license to user
+        await setDoc(doc(db, 'users', user.uid), {
+          email,
+          createdAt: new Date().toISOString(),
+          licenseKeys: [{
+            key: licenseKey,
+            plan: licenseData.plan,
+            activatedAt: new Date().toISOString(),
+            expiresAt: licenseData.expiresAt
+          }],
+          isActive: true
+        });
+        
+        // Update license to mark as used
+        await updateDoc(doc(db, 'licenses', licenseDoc.id), {
+          used: true,
+          userId: user.uid,
+          activatedAt: new Date().toISOString()
+        });
+        
+        return {
+          success: true,
+          message: 'License key activated successfully! A temporary account has been created.',
+          user: {
+            id: user.uid,
+            email: user.email,
+            licenseKeys: [{
+              key: licenseKey,
+              plan: licenseData.plan,
+              activatedAt: new Date().toISOString(),
+              expiresAt: licenseData.expiresAt
+            }]
+          }
+        };
+      }
+    } catch (error) {
+      console.error('License login error:', error);
+      return { success: false, message: error.message || 'License login failed' };
     }
   },
 
   // Associate a license key with a user
-  addLicenseKeyToUser(userId, licenseKey) {
-    // Check if license key exists and is not used
-    const licenseKeys = JSON.parse(localStorage.getItem('ultraSpooferLicenseKeys'));
-    const licenseKeyIndex = licenseKeys.findIndex(lk => lk.key === licenseKey);
-    
-    if (licenseKeyIndex === -1) {
-      return { success: false, message: 'Invalid license key.' };
-    }
-    
-    const licenseKeyData = licenseKeys[licenseKeyIndex];
-    
-    if (licenseKeyData.used) {
-      return { success: false, message: 'This license key has already been used.' };
-    }
-    
-    // Find the user
-    const users = JSON.parse(localStorage.getItem('ultraSpooferUsers'));
-    const userIndex = users.findIndex(user => user.id === userId);
-    
-    if (userIndex === -1) {
-      return { success: false, message: 'User not found.' };
-    }
-    
-    // Add license key to user
-    users[userIndex].licenseKeys.push({
-      key: licenseKey,
-      plan: licenseKeyData.plan,
-      activatedAt: new Date().toISOString(),
-      expiresAt: licenseKeyData.expiresAt
-    });
-    
-    // Mark license key as used
-    licenseKeys[licenseKeyIndex].used = true;
-    
-    // Update storage
-    localStorage.setItem('ultraSpooferUsers', JSON.stringify(users));
-    localStorage.setItem('ultraSpooferLicenseKeys', JSON.stringify(licenseKeys));
-    
-    // Update current user if this is the current user
-    const currentUserData = localStorage.getItem('ultraSpooferCurrentUser');
-    if (currentUserData) {
-      const currentUser = JSON.parse(currentUserData);
-      if (currentUser.id === userId) {
-        currentUser.licenseKeys = users[userIndex].licenseKeys;
-        localStorage.setItem('ultraSpooferCurrentUser', JSON.stringify(currentUser));
+  async addLicenseKeyToUser(licenseKey) {
+    try {
+      const user = auth.currentUser;
+      
+      if (!user) {
+        return { success: false, message: 'You must be logged in to activate a license key.' };
       }
+      
+      // Validate license key format
+      if (!this.isLicenseKeyFormat(licenseKey)) {
+        return { success: false, message: 'Invalid license key format.' };
+      }
+      
+      // Look up license key in Firestore
+      const licenseQuery = query(
+        collection(db, 'licenses'),
+        where('key', '==', licenseKey)
+      );
+      
+      const licenseSnapshot = await getDocs(licenseQuery);
+      
+      if (licenseSnapshot.empty) {
+        return { success: false, message: 'Invalid license key.' };
+      }
+      
+      const licenseDoc = licenseSnapshot.docs[0];
+      const licenseData = licenseDoc.data();
+      
+      // Check if license is already used
+      if (licenseData.userId) {
+        return { success: false, message: 'This license key has already been used.' };
+      }
+      
+      // Update license to mark as used
+      await updateDoc(doc(db, 'licenses', licenseDoc.id), {
+        used: true,
+        userId: user.uid,
+        activatedAt: new Date().toISOString()
+      });
+      
+      // Add license to user's licenseKeys array
+      await updateDoc(doc(db, 'users', user.uid), {
+        licenseKeys: arrayUnion({
+          key: licenseKey,
+          plan: licenseData.plan,
+          activatedAt: new Date().toISOString(),
+          expiresAt: licenseData.expiresAt
+        })
+      });
+      
+      return { success: true, message: 'License key activated successfully!' };
+    } catch (error) {
+      console.error('Add license error:', error);
+      return { success: false, message: error.message || 'Failed to activate license key' };
     }
-    
-    return { success: true, message: 'License key activated successfully!' };
   },
 
   // Logout the current user
-  logout() {
-    localStorage.removeItem('ultraSpooferCurrentUser');
-    return { success: true, message: 'Logged out successfully.' };
+  async logout() {
+    try {
+      await signOut(auth);
+      return { success: true, message: 'Logged out successfully.' };
+    } catch (error) {
+      console.error('Logout error:', error);
+      return { success: false, message: error.message || 'Logout failed' };
+    }
   },
 
   // Get the current logged in user
-  getCurrentUser() {
-    const userData = localStorage.getItem('ultraSpooferCurrentUser');
-    return userData ? JSON.parse(userData) : null;
+  async getCurrentUser() {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      return null;
+    }
+    
+    try {
+      // Get user data from Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (!userDoc.exists()) {
+        return {
+          id: user.uid,
+          email: user.email,
+          licenseKeys: []
+        };
+      }
+      
+      const userData = userDoc.data();
+      
+      return {
+        id: user.uid,
+        email: user.email,
+        licenseKeys: userData.licenseKeys || [],
+        createdAt: userData.createdAt
+      };
+    } catch (error) {
+      console.error('Get user error:', error);
+      return {
+        id: user.uid,
+        email: user.email,
+        licenseKeys: []
+      };
+    }
   },
 
   // Check if user is logged in
   isLoggedIn() {
-    return !!this.getCurrentUser();
+    return !!auth.currentUser;
   },
 
   // Utility functions
@@ -278,26 +376,17 @@ const AuthUtils = {
   },
 
   isLicenseKeyFormat(text) {
-    // Simple license key format check (adjust based on your actual format)
+    // Simple license key format check
     return /^ULTRA-SPOOF-\d{4}-[A-Z]{4}$/.test(text);
   },
 
-  generateUserId() {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  },
-
-  getSessionExpiryTime() {
-    // Session expires in 24 hours
-    const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + 24);
-    return expiryDate.toISOString();
-  },
-
-  getExpiryDate(days) {
-    if (!days) return null;
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    return date.toISOString();
+  generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
   },
 
   // Show notification
@@ -342,3 +431,5 @@ const AuthUtils = {
     }, 4000);
   }
 };
+
+export default AuthUtils;

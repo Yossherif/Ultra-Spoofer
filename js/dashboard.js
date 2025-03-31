@@ -1,36 +1,71 @@
-// Ultra Spoofer Dashboard Script
+// Ultra Spoofer Dashboard Script with Firebase
+
+import { auth, db } from './firebase-config';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import AuthUtils from './auth-utils';
 
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize authentication system
   AuthUtils.init();
   
-  // Check if user is logged in
-  if (!AuthUtils.isLoggedIn()) {
-    // Redirect to login page
-    window.location.href = 'log_in.html';
-    return;
-  }
-  
-  // Get current user data
-  const currentUser = AuthUtils.getCurrentUser();
-  
-  // Update the UI with user data
-  updateUIWithUserData(currentUser);
+  // Check if user is logged in using Firebase Auth
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      // Redirect to login page if not logged in
+      window.location.href = 'log_in.html';
+      return;
+    }
+    
+    // Get user data from Firestore
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        
+        // Update the UI with user data
+        updateUIWithUserData({
+          id: user.uid,
+          email: user.email,
+          licenseKeys: userData.licenseKeys || [],
+          createdAt: userData.createdAt
+        });
+      } else {
+        // User exists in Auth but not in Firestore
+        console.error('User document not found in Firestore');
+        AuthUtils.showNotification('User data could not be loaded. Please try logging in again.', true);
+      }
+    } catch (error) {
+      console.error('Error getting user data:', error);
+      AuthUtils.showNotification('Error loading user data: ' + error.message, true);
+    }
+  });
   
   // Handle logout button
   const logoutBtn = document.getElementById('logout-btn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', function() {
-      AuthUtils.logout();
-      window.location.href = 'index.html';
+    logoutBtn.addEventListener('click', async function() {
+      try {
+        const result = await AuthUtils.logout();
+        if (result.success) {
+          window.location.href = 'index.html';
+        } else {
+          AuthUtils.showNotification(result.message, true);
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+        AuthUtils.showNotification('Error during logout: ' + error.message, true);
+      }
     });
   }
   
-  // Demo download button (in a real app, this would trigger the download)
+  // Demo download button
   const downloadBtn = document.querySelector('.dashboard-card .btn-primary');
   if (downloadBtn) {
-    downloadBtn.addEventListener('click', function() {
-      const hasActiveLicense = currentUser.licenseKeys && currentUser.licenseKeys.length > 0;
+    downloadBtn.addEventListener('click', async function() {
+      const currentUser = await AuthUtils.getCurrentUser();
+      const hasActiveLicense = currentUser?.licenseKeys && currentUser.licenseKeys.length > 0;
       
       if (hasActiveLicense) {
         AuthUtils.showNotification('Download started. Your spoofer will be downloaded shortly.');
@@ -57,13 +92,10 @@ function updateUIWithUserData(user) {
     accountEmailElement.textContent = user.email;
   }
   
-  // Get user creation date
-  const users = JSON.parse(localStorage.getItem('ultraSpooferUsers'));
-  const userData = users.find(u => u.id === user.id);
-  
+  // Format creation date
   const accountCreatedElement = document.getElementById('account-created');
-  if (accountCreatedElement && userData) {
-    const createdDate = new Date(userData.createdAt);
+  if (accountCreatedElement && user.createdAt) {
+    const createdDate = new Date(user.createdAt);
     accountCreatedElement.textContent = createdDate.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -147,13 +179,13 @@ function updateLicenseList(user) {
   const addLicenseBtn = document.getElementById('add-license-btn');
   if (addLicenseBtn) {
     addLicenseBtn.addEventListener('click', function() {
-      showAddLicenseModal(user.id);
+      showAddLicenseModal();
     });
   }
 }
 
 // Show add license modal
-function showAddLicenseModal(userId) {
+async function showAddLicenseModal() {
   // Create modal element
   const modal = document.createElement('div');
   modal.style.cssText = `
@@ -192,7 +224,7 @@ function showAddLicenseModal(userId) {
     document.body.removeChild(modal);
   });
   
-  document.getElementById('submit-license').addEventListener('click', function() {
+  document.getElementById('submit-license').addEventListener('click', async function() {
     const licenseKey = document.getElementById('license-key-input').value.trim();
     
     if (!licenseKey) {
@@ -206,17 +238,23 @@ function showAddLicenseModal(userId) {
       return;
     }
     
-    // Add license key to user
-    const result = AuthUtils.addLicenseKeyToUser(userId, licenseKey);
-    
-    if (result.success) {
-      AuthUtils.showNotification(result.message);
-      document.body.removeChild(modal);
+    try {
+      // Add license key to user
+      const result = await AuthUtils.addLicenseKeyToUser(licenseKey);
       
-      // Update the UI with the new license
-      updateLicenseList(AuthUtils.getCurrentUser());
-    } else {
-      AuthUtils.showNotification(result.message, true);
+      if (result.success) {
+        AuthUtils.showNotification(result.message);
+        document.body.removeChild(modal);
+        
+        // Update the UI with the new license
+        const currentUser = await AuthUtils.getCurrentUser();
+        updateLicenseList(currentUser);
+      } else {
+        AuthUtils.showNotification(result.message, true);
+      }
+    } catch (error) {
+      console.error('Add license error:', error);
+      AuthUtils.showNotification('Error activating license: ' + error.message, true);
     }
   });
   

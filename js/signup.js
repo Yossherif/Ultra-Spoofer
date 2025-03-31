@@ -1,4 +1,5 @@
-// Ultra Spoofer Sign Up Page Script
+// Ultra Spoofer Sign Up Page Script with Firebase
+import AuthUtils from './auth-utils';
 
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Signup script loaded');
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Add form submission handler
   if (signupForm) {
-    signupForm.addEventListener('submit', function(event) {
+    signupForm.addEventListener('submit', async function(event) {
       event.preventDefault();
       
       // Get form values
@@ -39,52 +40,57 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Basic validation
       if (email === '' || password === '' || confirmPassword === '') {
-        showNotification('Please fill in all fields.', true);
+        AuthUtils.showNotification('Please fill in all fields.', true);
         return;
       }
       
       if (!AuthUtils.validateEmail(email)) {
-        showNotification('Please enter a valid email address.', true);
+        AuthUtils.showNotification('Please enter a valid email address.', true);
         return;
       }
       
       if (password !== confirmPassword) {
-        showNotification('Passwords do not match.', true);
+        AuthUtils.showNotification('Passwords do not match.', true);
         return;
       }
       
       if (!AuthUtils.validatePassword(password)) {
-        showNotification('Password must be at least 8 characters long and include at least one number or symbol.', true);
+        AuthUtils.showNotification('Password must be at least 8 characters long and include at least one number or symbol.', true);
         return;
       }
       
       if (!termsAccepted) {
-        showNotification('You must accept the terms to continue.', true);
+        AuthUtils.showNotification('You must accept the terms to continue.', true);
         return;
       }
       
-      // Attempt registration
-      const result = AuthUtils.register(email, password);
-      
-      if (result.success) {
-        showNotification('Account created successfully! Logging you in...');
+      try {
+        // Attempt registration
+        const result = await AuthUtils.register(email, password);
         
-        // Automatically log in the user
-        const loginResult = AuthUtils.login(email, password, false);
-        
-        if (loginResult.success) {
-          // Redirect to dashboard
-          setTimeout(() => {
-            window.location.href = 'dashboard.html';
-          }, 1500);
+        if (result.success) {
+          AuthUtils.showNotification('Account created successfully! Logging you in...');
+          
+          // Automatically log in the user
+          const loginResult = await AuthUtils.login(email, password, false);
+          
+          if (loginResult.success) {
+            // Redirect to dashboard
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 1500);
+          } else {
+            AuthUtils.showNotification('Account created but login failed. Please try logging in manually.', true);
+            setTimeout(() => {
+              window.location.href = 'log_in.html';
+            }, 2000);
+          }
         } else {
-          showNotification('Account created but login failed. Please try logging in manually.', true);
-          setTimeout(() => {
-            window.location.href = 'log_in.html';
-          }, 2000);
+          AuthUtils.showNotification(result.message, true);
         }
-      } else {
-        showNotification(result.message, true);
+      } catch (error) {
+        console.error('Registration error:', error);
+        AuthUtils.showNotification('Registration failed: ' + error.message, true);
       }
     });
   }
@@ -140,8 +146,48 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Use AuthUtils.showNotification instead of creating our own
-  function showNotification(message, isError = false) {
-    AuthUtils.showNotification(message, isError);
+  // Add password strength indicator
+  if (passwordInput && !document.querySelector('.password-strength')) {
+    const strengthIndicator = document.createElement('div');
+    strengthIndicator.className = 'password-strength';
+    strengthIndicator.style.cssText = `
+      height: 4px;
+      margin-top: 4px;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      background-color: #ef4444;
+      width: 0%;
+    `;
+    
+    passwordInput.parentElement.appendChild(strengthIndicator);
+    
+    passwordInput.addEventListener('input', function() {
+      const password = this.value;
+      let strength = 0;
+      
+      // Length check
+      if (password.length >= 8) strength += 25;
+      
+      // Character variety checks
+      if (/[0-9]/.test(password)) strength += 25;
+      if (/[a-z]/.test(password)) strength += 25;
+      if (/[A-Z]/.test(password)) strength += 15;
+      if (/[^0-9a-zA-Z]/.test(password)) strength += 10;
+      
+      // Cap at 100%
+      strength = Math.min(100, strength);
+      
+      // Update the indicator
+      strengthIndicator.style.width = strength + '%';
+      
+      // Color based on strength
+      if (strength < 30) {
+        strengthIndicator.style.backgroundColor = '#ef4444'; // Red
+      } else if (strength < 60) {
+        strengthIndicator.style.backgroundColor = '#f59e0b'; // Orange
+      } else {
+        strengthIndicator.style.backgroundColor = '#10b981'; // Green
+      }
+    });
   }
 });

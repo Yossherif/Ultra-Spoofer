@@ -1,4 +1,5 @@
-// Ultra Spoofer Login Page Script
+// Ultra Spoofer Login Page Script with Firebase
+import AuthUtils from './auth-utils';
 
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Login script loaded');
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Add form submission handler
   if (loginForm) {
-    loginForm.addEventListener('submit', function(event) {
+    loginForm.addEventListener('submit', async function(event) {
       event.preventDefault();
       
       // Get form values
@@ -36,22 +37,27 @@ document.addEventListener('DOMContentLoaded', function() {
       const rememberMe = rememberCheckbox ? rememberCheckbox.checked : false;
       
       if (!emailOrLicenseKey || !password) {
-        showNotification('Please enter both email/license and password.', true);
+        AuthUtils.showNotification('Please enter both email/license and password.', true);
         return;
       }
       
-      // Attempt login
-      const result = AuthUtils.login(emailOrLicenseKey, password, rememberMe);
-      
-      if (result.success) {
-        showNotification('Login successful! Redirecting to dashboard...');
+      try {
+        // Attempt login
+        const result = await AuthUtils.login(emailOrLicenseKey, password, rememberMe);
         
-        // Redirect to dashboard
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 1500);
-      } else {
-        showNotification(result.message, true);
+        if (result.success) {
+          AuthUtils.showNotification('Login successful! Redirecting to dashboard...');
+          
+          // Redirect to dashboard
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1500);
+        } else {
+          AuthUtils.showNotification(result.message, true);
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        AuthUtils.showNotification('Login failed: ' + error.message, true);
       }
     });
   }
@@ -86,9 +92,15 @@ document.addEventListener('DOMContentLoaded', function() {
   if (emailInput) addInputListeners(emailInput);
   if (passwordInput) addInputListeners(passwordInput);
 
-  // Function to show notifications
-  // Use AuthUtils.showNotification instead of creating our own
-function showNotification(message, isError = false) {
-    AuthUtils.showNotification(message, isError);
-}
+  // Add info text about license keys
+  if (emailInput) {
+    // Only add if it doesn't already exist
+    if (!document.querySelector('.login-form .form-info')) {
+      const infoText = document.createElement('p');
+      infoText.className = 'form-info';
+      infoText.style.cssText = 'color: #d1d5db; font-size: 0.8rem; margin-top: 0.25rem;';
+      infoText.textContent = 'You can log in with your email or license key (e.g. ULTRA-SPOOF-1234-ABCD)';
+      emailInput.parentElement.appendChild(infoText);
+    }
+  }
 });
